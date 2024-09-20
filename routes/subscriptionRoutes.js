@@ -1,9 +1,9 @@
 const express = require('express');
-const { createSubscription, renewSubscription, deleteSubscription } = require('../controllers/subscriptionController');
+const { renewSubscription, deleteSubscription, createCheckoutSession } = require('../controllers/subscriptionController');
 
 const router = express.Router();
 
-router.post('/', createSubscription);
+router.post('/', createCheckoutSession);
 router.post('/renew', renewSubscription);
 router.delete('/:id', deleteSubscription);
 
