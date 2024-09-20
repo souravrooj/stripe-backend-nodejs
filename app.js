@@ -4,6 +4,7 @@ const cors = require('cors');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
 const planRoutes = require('./routes/planRoutes');
 const webhookRouter = require('./routes/webhook');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/checkout-session', subscriptionRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/webhook', webhookRouter);
+app.use('/api/user', userRoutes);
 
 
 module.exports = app;

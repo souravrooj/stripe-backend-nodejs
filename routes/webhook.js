@@ -12,26 +12,26 @@ const User = require('../models/User');
 // Define the handler for subscription creation
 const handleSubscriptionCreated = async (subscription) => {
     try {
-        // Find the userId using the Stripe customer ID (if you have a mapping)
         let user = await User.findOne({ stripeCustomerId: subscription.customer });
 
-        // If the user doesn't exist, create a new one
         if (!user) {
-            console.log('subscription',subscription);
+            const customer = await stripe.customers.retrieve(subscription.customer); // Retrieve the customer
+
             user = new User({
                 stripeCustomerId: subscription.customer,
-                email: subscription.customer_email, // Use the correct path for the email field
-                name: subscription.customer_name // If you have the customer's name available from Stripe
+                email: customer.email, // Get email from the customer object
+                name: customer.name, // Get name from the customer object
+                address: customer.address, // Save the address
+                // Add other relevant fields as needed
             });
             await user.save();
             console.log('User created:', user);
         }
 
-        // Create or update a subscription record in your database
         await Subscription.create({
             stripeSubscriptionId: subscription.id,
             customerId: subscription.customer,
-            userId: user._id, // Correctly reference the userId
+            userId: user._id,
             status: subscription.status,
             plan: subscription.plan.id,
             // Add other relevant fields as needed
@@ -41,6 +41,7 @@ const handleSubscriptionCreated = async (subscription) => {
         console.error('Error saving subscription:', error);
     }
 };
+
 
 // Define the handler for subscription updates
 const handleSubscriptionUpdated = async (subscription) => {
