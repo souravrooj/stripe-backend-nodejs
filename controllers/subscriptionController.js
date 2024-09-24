@@ -33,6 +33,7 @@ exports.createCheckoutSession = async (req, res) => {
                 name: customerName, // Include name if available
             });
             user.stripeCustomerId = customer.id;
+            user.status = 'active';
             await user.save(); // Update user with Stripe customer ID
         }
 

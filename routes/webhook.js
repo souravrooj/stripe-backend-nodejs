@@ -132,25 +132,30 @@ async function processWebhookTypeSubscriptionUpdated(webhookData) {
 
 async function processWebhookTypeSubscriptionDeleted(webhookData) {
     log(`Processing subscription deleted: ${webhookData.id}`);
-    console.log(webhookData.customer);
     const { id: stripeSubscriptionId, customer: customerId } = webhookData;
 
     try {
         // Remove the subscription from the database
-        const result = await Subscription.deleteOne({ customerId: webhookData.customer});
+        const result = await Subscription.deleteOne({ customerId: webhookData.customer });
 
         if (result.deletedCount === 0) {
-            log(`No subscription found for ID: ${stripeSubscriptionId}`);
+            log(`No subscription found for customer ID: ${customerId}`);
         } else {
             log(`Subscription deleted: ${stripeSubscriptionId}`);
 
             // Update user information
             const user = await User.findOne({ stripeCustomerId: customerId });
-            console.log(user);
             if (user) {
-                User.status = 'canceled'; // Update the status to 'canceled' or other as needed
-                await user.save();
-                log(`User updated with canceled subscription status.`);
+                log(`User found: ${user._id}`);
+                
+                // Await the update operation
+                const updatedUser = await User.findOneAndUpdate(
+                    { stripeCustomerId: customerId }, 
+                    { $set: { status: 'canceled' } }, 
+                    { new: true } // Return the updated document
+                );
+
+                log(`User updated with canceled subscription status: ${updatedUser.status}`);
             } else {
                 log(`User not found for customer ID: ${customerId}`);
             }
@@ -159,6 +164,7 @@ async function processWebhookTypeSubscriptionDeleted(webhookData) {
         log(`Error deleting subscription: ${error.message}`);
     }
 }
+
 
 async function processWebhookTypePaymentIntent(webhookData) {
     log(`Processing payment intent: ${webhookData.id}`);
