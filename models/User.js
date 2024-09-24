@@ -5,7 +5,8 @@ const UserSchema = new mongoose.Schema({
     name: { type: String },
     stripeCustomerId: { type: String, unique: true }, // To store Stripe customer ID
     createdAt: { type: Date, default: Date.now }, // Optional: Track user creation date
-    updatedAt: { type: Date, default: Date.now } // Optional: Track user updates
+    updatedAt: { type: Date, default: Date.now }, // Optional: Track user updates,
+    status: { type: String, default: 'active' }
 });
 
 // Middleware to update `updatedAt` field automatically
