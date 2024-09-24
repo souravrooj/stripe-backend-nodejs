@@ -13,7 +13,13 @@ exports.createPlan = async (req, res) => {
             return res.status(400).json({ error: 'All fields are required.' });
         }
 
-        // Step 2: Create a product in Stripe using productName
+        // Validate interval
+        const validIntervals = ['day', 'month', 'year'];
+        if (!validIntervals.includes(interval)) {
+            return res.status(400).json({ error: 'Invalid interval. Allowed values are: ' + validIntervals.join(', ') });
+        }
+
+        // Step 2: Create a product in Stripe
         let product;
         try {
             product = await stripe.products.create({
@@ -41,7 +47,7 @@ exports.createPlan = async (req, res) => {
             plan = await stripe.plans.create({
                 product: product.id,
                 nickname: planName,
-                amount,
+                amount: amount * (interval === 'day' ? 30 : 1), // Adjust amount if daily
                 currency: 'usd',
                 interval,
             });
@@ -68,10 +74,10 @@ exports.createPlan = async (req, res) => {
         res.status(201).json(newPlan);
     } catch (error) {
         console.log(error);
-        // Catch any unforeseen errors
         res.status(500).json({ error: 'An unexpected error occurred: ' + error.message });
     }
 };
+
 
 
 // Fetch all plans
